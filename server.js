@@ -6,16 +6,13 @@ const app = express();
 
 import { Server } from "socket.io";
 
-app.use(cors());
+app.use(cors({origin:'*', credentials:true, optionsSuccessStatus:200,}));
 
 const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
     origin: "https://powerful-savannah-89124.herokuapp.com/", //Se pone la dirección del servidor de react
-    headers: {
-      "Access-Control-Allow-Origin":
-        "https://powerful-savannah-89124.herokuapp.com/",
     },
   },
 });
