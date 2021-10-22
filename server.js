@@ -12,7 +12,7 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", //Se pone la dirección del servidor de react
+    origin: "https://powerful-savannah-89124.herokuapp.com/", //Se pone la dirección del servidor de react
   },
 });
 
