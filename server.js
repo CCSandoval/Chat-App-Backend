@@ -10,7 +10,9 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://powerful-savannah-89124.herokuapp.com", //Se pone la dirección del servidor de react
+    origin: true, //Se pone la dirección del servidor de react
+    credentials: true,
+    allowedHeaders: "*",
   },
 });
 
