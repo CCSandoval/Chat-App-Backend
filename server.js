@@ -5,18 +5,15 @@ import cors from "cors";
 const app = express();
 
 import { Server } from "socket.io";
-const corsOptions = {
-  origin: "*",
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+app.use(cors());
 
 const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
     origin: "https://powerful-savannah-89124.herokuapp.com/", //Se pone la dirección del servidor de react
+    credentials: true,
+    optionsSuccessStatus: 200,
   },
 });
 
