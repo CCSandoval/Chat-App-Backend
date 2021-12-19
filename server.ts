@@ -4,6 +4,8 @@ import { Server } from "socket.io";
 import dotenv = require("dotenv");
 import cors = require("cors");
 import { ConnectDB } from "./db/db";
+import { RoomModel } from "./models/Rooms";
+import { MessageModel } from "./models/Messages";
 
 dotenv.config({ path: "./.env" });
 const app = express();
@@ -25,22 +27,46 @@ io.on("connection", (socket) => {
   console.log(`User connected on: ${socket.id}`);
 
   //Receives a parameter named data, the frontend sends the id as the data so that the user joins a chatroom with that id
-  socket.on("joinRoom", (data) => {
-    socket.join(data.room);
-    console.log(
-      `User ${data.username} joined the room ${data.room} (UserID: ${socket.id})`
-    );
+  socket.on("joinRoom", async (data) => {
+    const foundRoom = await RoomModel.findOne({ roomId: data.room });
+    if (foundRoom) {
+      console.log("Encontró la sala");
+      socket.join(data.room);
+      const roomMessages = await MessageModel.find({ room: foundRoom._id });
+      socket.join(data.room);
+      socket.emit("sendMessages", roomMessages);
+    } else {
+      await RoomModel.create({ roomId: data.room })
+        .then(() => {
+          console.log("Creó la sala");
+        })
+        .catch((e) => {
+          console.log("Error creando la sala", e);
+          socket.join(data.room);
+        });
+    }
   });
 
   //Receives a parameter named data
   //The frontend sends the message, time, user and room as the data so we can display it to the other users in the room
-  socket.on("sendMessage", (data) => {
+  socket.on("sendMessage", async (data) => {
+    const sala = await RoomModel.findOne({ roomId: data.room });
+    await MessageModel.create({
+      user: data.user,
+      message: data.message,
+      room: sala._id,
+      time: data.time,
+    })
+      .then(() => {
+        console.log("Mensaje creado");
+      })
+      .catch((e) => {
+        console.log("Error creando el mensaje", e);
+      });
+
     //Sends the message, time, user and room as the data to the frontend display to the user
     //Display the message to a specific thanks to the .to(data.room)
     socket.to(data.room).emit("receiveMessage", data);
-    console.log(
-      `${data.user} sent the message: ${data.message} in room ${data.room}`
-    );
   });
 
   //socket.on("disconnect") ejecuta la función entregada cuando el usuario se desconecta
@@ -49,7 +75,7 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(process.env.PORT, async () => {
+server.listen(process.env.PORT || 5000, async () => {
   await ConnectDB();
-  console.log("🚀 Servidor iniciado en en 8000");
+  console.log("🚀 Servidor iniciado en", process.env.PORT || 5000);
 });

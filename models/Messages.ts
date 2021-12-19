@@ -5,6 +5,7 @@ interface Message {
   user: String;
   message: String;
   room: Schema.Types.ObjectId;
+  time: String;
 }
 
 const MessageSchema = new Schema<Message>({
@@ -20,6 +21,10 @@ const MessageSchema = new Schema<Message>({
     type: Schema.Types.ObjectId,
     required: true,
     ref: RoomModel,
+  },
+  time: {
+    type: String,
+    required: true,
   },
 });
 
