@@ -24,25 +24,17 @@ app.use(cors());
 
 //io.on() = La función entregada se ejecutará cada vez que un usuario se conecte al servidor
 io.on("connection", (socket) => {
-  console.log(`User connected on: ${socket.id}`);
-
   //Receives a parameter named data, the frontend sends the id as the data so that the user joins a chatroom with that id
   socket.on("joinRoom", async (data) => {
     const foundRoom = await RoomModel.findOne({ roomId: data.room });
     if (foundRoom) {
-      console.log("Encontró la sala");
       socket.join(data.room);
       const roomMessages = await MessageModel.find({ room: foundRoom._id });
-      socket.join(data.room);
       socket.emit("sendMessages", roomMessages);
     } else {
-      await RoomModel.create({ roomId: data.room })
-        .then(() => {
-          console.log("Creó la sala");
-        })
+      await RoomModel.create({ roomId: data.room })        
         .catch((e) => {
           console.log("Error creando la sala", e);
-          socket.join(data.room);
         });
     }
   });
